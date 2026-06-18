@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Goofy 67 Snake - Audio Fixed</title>
+    <title>JJsnake game 2.67(special edition)</title>
     <style>
         * {
             box-sizing: border-box;
@@ -51,7 +51,6 @@
             pointer-events: none;
             font-family: monospace;
         }
-        /* NEW: Start Menu Overlay Styles */
         #start-menu {
             position: absolute;
             top: 0;
@@ -86,7 +85,6 @@
             cursor: pointer;
             box-shadow: 0 10px 25px rgba(255, 234, 0, 0.4);
             transition: transform 0.2s;
-            font-family: system-ui, sans-serif;
         }
         #play-btn:active {
             transform: scale(0.95);
@@ -97,7 +95,7 @@
 
     <div id="game-container">
         <div id="start-menu">
-            <h1 id="start-title">GOOFY SNAKE 67<br><span style="color:#ffea00; font-size:24px;">MEME EDITION</span></h1>
+            <h1 id="start-title">GOOFY SNAKE 67<br><span style="color:#ffea00; font-size:24px;">100% SOUND MEME</span></h1>
             <button id="play-btn" onclick="startGame()">START GAME</button>
         </div>
         
@@ -111,9 +109,9 @@
         const scoreEl = document.getElementById('score');
         const startMenu = document.getElementById('start-menu');
 
-        // --- Web Audio & Funny Voice Engine ---
+        // --- Guaranteed 100% Web Audio Synth Engine ---
         let audioCtx = null;
-        let isGameStarted = false; // Controls if game is running
+        let isGameStarted = false; 
 
         function initAudio() {
             if (!audioCtx) {
@@ -124,30 +122,43 @@
             }
         }
 
-        // NEW: Goofy Meme Voice Text-To-Speech for "Sixty Seven"
-        function speakSixtySeven() {
-            if (!window.speechSynthesis) return;
+        // NEW: 100% Working Hilarious Arcade Laser Sound for 67
+        function playCrazy67Sound() {
+            if (!audioCtx) return;
             try {
-                // Cancel any ongoing speech so it doesn't lag
-                window.speechSynthesis.cancel();
+                let now = audioCtx.currentTime;
+                // Create 2 oscillators to make a weird, funny "biu-biu-biu" laser combo effect
+                let osc1 = audioCtx.createOscillator();
+                let osc2 = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
                 
-                let utterance = new SpeechSynthesisUtterance("Sixty Seven!");
-                utterance.lang = 'en-US'; 
+                osc1.connect(gain);
+                osc2.connect(gain);
+                gain.connect(audioCtx.destination);
                 
-                // CRITICAL HACK: Make it sound super funny, high-pitched like a minion / meme
-                utterance.pitch = 2.0;  // Maximum funny high pitch
-                utterance.rate = 1.4;   // Fast funny talking speed
-                utterance.volume = 1.0; // Max volume
+                osc1.type = 'sawtooth'; // Angry meme buzzing
+                osc2.type = 'square';   // Glitchy retro arcade
                 
-                window.speechSynthesis.speak(utterance);
-            } catch (e) {}
+                // Frequency extreme slides up and down for comedy effect
+                osc1.frequency.setValueAtTime(100, now);
+                osc1.frequency.linearRampToValueAtTime(1500, now + 0.1);
+                osc1.frequency.linearRampToValueAtTime(300, now + 0.3);
+                
+                osc2.frequency.setValueAtTime(300, now);
+                osc2.frequency.linearRampToValueAtTime(1800, now + 0.15);
+                osc2.frequency.linearRampToValueAtTime(50, now + 0.3);
+                
+                gain.gain.setValueAtTime(0.4, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.3);
+                
+                osc1.start(now);
+                osc2.start(now);
+                osc1.stop(now + 0.3);
+                osc2.stop(now + 0.3);
+            } catch(e) {}
         }
 
-        function playEatSound(is67) {
-            if (is67) {
-                speakSixtySeven(); // Speak "Sixty Seven!" immediately
-                return;
-            }
+        function playEatSound() {
             if (!audioCtx) return;
             try {
                 let osc = audioCtx.createOscillator();
@@ -157,11 +168,11 @@
                 
                 osc.type = 'triangle';
                 osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.1);
+                osc.frequency.exponentialRampToValueAtTime(900, audioCtx.currentTime + 0.08);
                 gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-                gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.1);
+                gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.08);
                 osc.start();
-                osc.stop(audioCtx.currentTime + 0.1);
+                osc.stop(audioCtx.currentTime + 0.08);
             } catch(e) {}
         }
 
@@ -174,8 +185,8 @@
                 gain.connect(audioCtx.destination);
                 
                 osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(180, audioCtx.currentTime);
-                osc.frequency.linearRampToValueAtTime(50, audioCtx.currentTime + 0.4);
+                osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(40, audioCtx.currentTime + 0.4);
                 gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
                 gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.4);
                 
@@ -184,27 +195,25 @@
             } catch(e) {}
         }
 
-        // NEW: Function triggered when clicking START GAME
         function startGame() {
-            initAudio(); // Legally unlock browser audio
+            initAudio(); 
             isGameStarted = true;
-            startMenu.style.display = 'none'; // Hide the menu
-            // Play a funny entry audio hint
-            if (window.speechSynthesis) {
-                let welcome = new SpeechSynthesisUtterance("Let's go!");
-                welcome.lang = 'en-US';
-                welcome.pitch = 1.6;
-                welcome.rate = 1.2;
-                window.speechSynthesis.speak(welcome);
-            }
+            startMenu.style.display = 'none'; 
+            
+            // Funny startup audio blip
+            try {
+                let osc = audioCtx.createOscillator();
+                let g = audioCtx.createGain();
+                osc.connect(g); g.connect(audioCtx.destination);
+                osc.type = 'square'; osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                g.gain.setValueAtTime(0.1, audioCtx.currentTime); g.gain.linearRampToValueAtTime(0, audioCtx.currentTime+0.1);
+                osc.start(); osc.stop(audioCtx.currentTime+0.1);
+            } catch(e){}
         }
 
         // --- Core Variables ---
         let snake = [
-            {x: 400, y: 300},
-            {x: 385, y: 300},
-            {x: 370, y: 300},
-            {x: 355, y: 300}
+            {x: 400, y: 300}, {x: 385, y: 300}, {x: 370, y: 300}, {x: 355, y: 300}
         ];
         
         let radius = 12;       
@@ -228,16 +237,18 @@
         ];
 
         let food = { x: 0, y: 0, radius: 16, pulse: 1, type: '🍎' };
-        const foodPool = ['🍎', '🍌', '🍓', '🍕', '🍇', '🍔', '67'];
+        const fruits = ['🍎', '🍌', '🍓', '🍩', '🍕', '🍇', '🍉', '🥑', '🍔', '🍟'];
 
         function respawnFood() {
             food.x = Math.random() * (canvas.width - 100) + 50;
             food.y = Math.random() * (canvas.height - 100) + 50;
-            food.type = foodPool[Math.floor(Math.random() * foodPool.length)];
             
-            if (food.type === '67') {
-                food.radius = 26; 
+            // NEW MODIFIED PROBABILITY: 35% chance to spawn 67! (Extremely high, shows up almost every 2-3 turns)
+            if (Math.random() < 0.35) {
+                food.type = '67';
+                food.radius = 28; // Make its hitbox huge
             } else {
+                food.type = fruits[Math.floor(Math.random() * fruits.length)];
                 food.radius = 16;
             }
         }
@@ -246,13 +257,13 @@
 
         // --- Core Logic: Update ---
         function update() {
-            if (!isGameStarted || isGameOver) return; // Wait for game start menu
+            if (!isGameStarted || isGameOver) return; 
 
             if (goofyMemeTimer > 0) goofyMemeTimer--;
             if (memeTextTimer > 0) memeTextTimer--;
 
             if (goofyMemeTimer > 0) {
-                waveTimer += speed * 0.4; 
+                waveTimer += speed * 0.45; // Super violent trembling
             } else {
                 waveTimer += speed * 0.02; 
             }
@@ -284,10 +295,10 @@
                     goofyMemeTimer = 90; 
                     memeTextTimer = 90;  
                     lastMemeMessage = memePhrases[Math.floor(Math.random() * memePhrases.length)];
-                    playEatSound(true);  // Trigger English Meme Voice!
+                    playCrazy67Sound();  // Trigger 100% functional crazy synthesizer noise
                 } else {
                     score += 10;
-                    playEatSound(false); 
+                    playEatSound(); 
                 }
                 scoreEl.innerText = score.toString().padStart(3, '0');
                 respawnFood();
@@ -295,11 +306,7 @@
                 growPending += 3; 
             }
 
-            if (growPending > 0) {
-                growPending--; 
-            } else {
-                snake.pop(); 
-            }
+            if (growPending > 0) { growPending--; } else { snake.pop(); }
 
             for (let i = 15; i < snake.length; i++) {
                 let sDx = head.x - snake[i].x;
@@ -323,13 +330,13 @@
             // 1. Draw Snake
             snake.forEach((segment, index) => {
                 ctx.beginPath();
-                
                 let renderX = segment.x;
                 let renderY = segment.y;
 
                 if (goofyMemeTimer > 0) {
-                    renderX += Math.sin(waveTimer + index * 0.8) * 12 * Math.sin(angle + Math.PI/2);
-                    renderY += Math.cos(waveTimer + index * 0.8) * 12 * Math.cos(angle + Math.PI/2);
+                    // Crazy meme displacement mapping
+                    renderX += Math.sin(waveTimer + index * 0.8) * 14 * Math.sin(angle + Math.PI/2);
+                    renderY += Math.cos(waveTimer + index * 0.8) * 14 * Math.cos(angle + Math.PI/2);
                 }
 
                 if (index === 0) {
@@ -340,26 +347,15 @@
                     let eyeOffsetAngle = 0.5; 
                     let leftEyeX = renderX + Math.cos(angle - eyeOffsetAngle) * 10;
                     let leftEyeY = renderY + Math.sin(angle - eyeOffsetAngle) * 10;
-                    ctx.beginPath();
-                    ctx.arc(leftEyeX, leftEyeY, 5, 0, Math.PI * 2);
-                    ctx.fillStyle = '#ffffff';
-                    ctx.fill();
+                    ctx.beginPath(); ctx.arc(leftEyeX, leftEyeY, 5, 0, Math.PI * 2); ctx.fillStyle = '#ffffff'; ctx.fill();
                     ctx.beginPath(); 
                     let pupilOffset = goofyMemeTimer > 0 ? 1 : 2.5;
-                    ctx.arc(leftEyeX, leftEyeY, pupilOffset, 0, Math.PI * 2);
-                    ctx.fillStyle = '#000000';
-                    ctx.fill();
+                    ctx.arc(leftEyeX, leftEyeY, pupilOffset, 0, Math.PI * 2); ctx.fillStyle = '#000000'; ctx.fill();
 
                     let rightEyeX = renderX + Math.cos(angle + eyeOffsetAngle) * 10;
                     let rightEyeY = renderY + Math.sin(angle + eyeOffsetAngle) * 10;
-                    ctx.beginPath();
-                    ctx.arc(rightEyeX, rightEyeY, 5, 0, Math.PI * 2);
-                    ctx.fillStyle = '#ffffff';
-                    ctx.fill();
-                    ctx.beginPath(); 
-                    ctx.arc(rightEyeX, rightEyeY, pupilOffset, 0, Math.PI * 2);
-                    ctx.fillStyle = '#000000';
-                    ctx.fill();
+                    ctx.beginPath(); ctx.arc(rightEyeX, rightEyeY, 5, 0, Math.PI * 2); ctx.fillStyle = '#ffffff'; ctx.fill();
+                    ctx.beginPath(); ctx.arc(rightEyeX, rightEyeY, pupilOffset, 0, Math.PI * 2); ctx.fillStyle = '#000000'; ctx.fill();
                 } else {
                     let bodyRadius = radius * (1 - index / (snake.length + 10));
                     ctx.arc(renderX, renderY, bodyRadius, 0, Math.PI * 2);
@@ -368,7 +364,7 @@
                 }
             });
 
-            // 2. Draw Food 
+            // 2. Draw Food
             ctx.save();
             ctx.translate(food.x, food.y);
             let currentScale = food.pulse;
@@ -377,10 +373,10 @@
             ctx.textBaseline = "middle";
             
             if (food.type === '67') {
-                ctx.font = "900 55px Impact, sans-serif"; 
-                ctx.fillStyle = '#ffeb3b'; 
-                ctx.shadowBlur = 25; 
-                ctx.shadowColor = '#ffeb3b';
+                ctx.font = "900 60px Impact, sans-serif"; // Made 67 even bigger!
+                ctx.fillStyle = '#ffea00'; 
+                ctx.shadowBlur = 30; 
+                ctx.shadowColor = '#ffea00';
                 ctx.fillText(food.type, 0, 0);
             } else {
                 ctx.font = "34px serif";
@@ -388,14 +384,14 @@
             }
             ctx.restore();
 
-            // Flashing meme text on screen center
+            // Flashing meme texts
             if (memeTextTimer > 0) {
                 ctx.save();
-                ctx.fillStyle = memeTextTimer % 4 === 0 ? '#00e5ff' : '#ffea00'; 
-                ctx.font = 'black 36px Impact, Arial Black, sans-serif';
+                ctx.fillStyle = memeTextTimer % 4 === 0 ? '#00e5ff' : '#ff2a74'; 
+                ctx.font = 'black 38px Impact, Arial Black, sans-serif';
                 ctx.textAlign = 'center';
-                let textShakeY = Math.sin(Date.now() * 0.05) * 4;
-                ctx.fillText(lastMemeMessage, canvas.width / 2, 100 + textShakeY);
+                let textShakeY = Math.sin(Date.now() * 0.05) * 6;
+                ctx.fillText(lastMemeMessage, canvas.width / 2, 110 + textShakeY);
                 ctx.restore();
             }
 
@@ -403,52 +399,30 @@
             if (isGameOver) {
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
-
                 ctx.fillStyle = '#ff2a74';
-                ctx.font = 'bold 45px system-ui, -apple-system'; 
+                ctx.font = 'bold 45px system-ui'; 
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 30);
-
                 ctx.fillStyle = '#ffffff';
-                ctx.font = '16px system-ui, -apple-system'; 
+                ctx.font = '16px system-ui'; 
                 ctx.fillText('TAP SCREEN TO RESTART', canvas.width / 2, canvas.height / 2 + 40);
             }
         }
 
         function resetGame() {
-            score = 0;
-            speed = 6; 
-            angle = 0;
-            targetAngle = 0;
-            isGameOver = false;
-            growPending = 0; 
-            waveTimer = 0;
-            goofyMemeTimer = 0;
-            memeTextTimer = 0;
+            score = 0; speed = 6; angle = 0; targetAngle = 0; isGameOver = false; growPending = 0; waveTimer = 0; goofyMemeTimer = 0; memeTextTimer = 0;
             scoreEl.innerText = "000";
-            snake = [
-                {x: 400, y: 300},
-                {x: 385, y: 300},
-                {x: 370, y: 300},
-                {x: 355, y: 300}
-            ];
+            snake = [{x: 400, y: 300}, {x: 385, y: 300}, {x: 370, y: 300}, {x: 355, y: 300}];
             respawnFood();
         }
 
-        function loop() {
-            update(); 
-            draw();
-            requestAnimationFrame(loop);
-        }
+        function loop() { update(); draw(); requestAnimationFrame(loop); }
 
-        // --- Controls Controls Listener ---
+        // --- Event Listeners ---
         window.addEventListener('keydown', (e) => {
             initAudio(); 
-            if (isGameOver) {
-                resetGame();
-                return;
-            }
+            if (isGameOver) { resetGame(); return; }
             switch(e.key) {
                 case 'ArrowUp':    targetAngle = -Math.PI / 2; break;
                 case 'ArrowDown':  targetAngle = Math.PI / 2; break;
@@ -457,32 +431,19 @@
             }
         });
 
-        let touchStartX = 0;
-        let touchStartY = 0;
-
+        let touchStartX = 0; let touchStartY = 0;
         window.addEventListener('touchstart', (e) => {
             initAudio(); 
-            if (isGameOver) {
-                resetGame();
-                return;
-            }
-            touchStartX = e.touches[0].clientX;
-            touchStartY = e.touches[0].clientY;
+            if (isGameOver) { resetGame(); return; }
+            touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY;
         }, { passive: true });
 
         window.addEventListener('touchmove', (e) => {
             if (!touchStartX || !touchStartY || isGameOver || !isGameStarted) return;
-
-            let touchEndX = e.touches[0].clientX;
-            let touchEndY = e.touches[0].clientY;
-
-            let dx = touchEndX - touchStartX;
-            let dy = touchEndY - touchStartY;
-
+            let touchEndX = e.touches[0].clientX; let touchEndY = e.touches[0].clientY;
+            let dx = touchEndX - touchStartX; let dy = touchEndY - touchStartY;
             if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
-                targetAngle = Math.atan2(dy, dx); 
-                touchStartX = touchEndX;
-                touchStartY = touchEndY;
+                targetAngle = Math.atan2(dy, dx); touchStartX = touchEndX; touchStartY = touchEndY;
             }
         }, { passive: true });
 
