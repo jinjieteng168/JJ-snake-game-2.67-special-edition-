@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>JJ snake game 2.67(special edition)</title>
+    <title>Goofy 67 Snake - Audio Fixed</title>
     <style>
         * {
             box-sizing: border-box;
@@ -50,10 +50,9 @@
             text-shadow: 0 4px 8px rgba(0,0,0,0.5);
             pointer-events: none;
             font-family: monospace;
-            display: none; /* Hidden until game starts */
         }
-        /* NEW: Beautiful Welcome/Start Screen Overlay */
-        #start-screen {
+        /* NEW: Start Menu Overlay Styles */
+        #start-menu {
             position: absolute;
             top: 0;
             left: 0;
@@ -66,33 +65,30 @@
             justify-content: center;
             z-index: 10;
         }
-        #start-screen h1 {
-            font-size: 48px;
+        #start-title {
+            font-size: 45px;
             font-weight: 900;
-            color: #ffea00;
-            margin-bottom: 10px;
-            text-shadow: 0 0 20px rgba(255, 234, 0, 0.4);
+            color: #ff2a74;
+            margin-bottom: 30px;
+            text-shadow: 0 0 20px rgba(255, 42, 116, 0.5);
+            text-align: center;
             font-family: Impact, sans-serif;
             letter-spacing: 2px;
         }
-        #start-screen p {
-            font-size: 16px;
-            color: #8a85a5;
-            margin-bottom: 40px;
-        }
-        #start-btn {
+        #play-btn {
             padding: 15px 40px;
-            font-size: 22px;
+            font-size: 24px;
             font-weight: bold;
-            color: #fff;
-            background: linear-gradient(135deg, #ff2a74 0%, #ff6b00 100%);
+            color: #110e1c;
+            background: #ffea00;
             border: none;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 8px 25px rgba(255, 42, 116, 0.4);
+            box-shadow: 0 10px 25px rgba(255, 234, 0, 0.4);
             transition: transform 0.2s;
+            font-family: system-ui, sans-serif;
         }
-        #start-btn:active {
+        #play-btn:active {
             transform: scale(0.95);
         }
     </style>
@@ -100,12 +96,11 @@
 <body>
 
     <div id="game-container">
-        <div id="start-screen">
-            <h1>GOOFY SNAKE 67</h1>
-            <p>FEATURING EXTREME 67 MEME EFFECTS</p>
-            <button id="start-btn" onclick="startGameFromMenu()">TAP TO PLAY</button>
+        <div id="start-menu">
+            <h1 id="start-title">GOOFY SNAKE 67<br><span style="color:#ffea00; font-size:24px;">MEME EDITION</span></h1>
+            <button id="play-btn" onclick="startGame()">START GAME</button>
         </div>
-
+        
         <div id="ui-layer">SCORE: <span id="score">000</span></div>
         <canvas id="gameCanvas" width="800" height="600"></canvas>
     </div>
@@ -114,50 +109,45 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const scoreEl = document.getElementById('score');
-        const uiLayer = document.getElementById('ui-layer');
-        const startScreen = document.getElementById('start-screen');
+        const startMenu = document.getElementById('start-menu');
 
-        // --- Web Audio Tech: Retro Sound Generator ---
+        // --- Web Audio & Funny Voice Engine ---
         let audioCtx = null;
-        let bgmNode = null; // Holds the background music loop
+        let isGameStarted = false; // Controls if game is running
 
-        function initAudioEngine() {
+        function initAudio() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             }
-            if (audioCtx.state === 'suspended') {
+            if (audioCtx && audioCtx.state === 'suspended') {
                 audioCtx.resume();
             }
-            startBackgroundMusic(); // Start loop music immediately on click
         }
 
-        // Procedural 8-bit background music tracker
-        function startBackgroundMusic() {
-            if (bgmNode) return; 
+        // NEW: Goofy Meme Voice Text-To-Speech for "Sixty Seven"
+        function speakSixtySeven() {
+            if (!window.speechSynthesis) return;
             try {
-                // Creates a retro repetitive electronic melody loop
-                let t = 0;
-                let bufferSize = audioCtx.sampleRate * 2; // 2 seconds loop
-                let buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-                let data = buffer.getChannelData(0);
+                // Cancel any ongoing speech so it doesn't lag
+                window.speechSynthesis.cancel();
                 
-                // Classic chiptune generator formula
-                for (let i = 0; i < bufferSize; i++) {
-                    let time = i / audioCtx.sampleRate;
-                    // Simple retro bass arp pattern (Notes sliding)
-                    let note = [110, 130, 146, 165][Math.floor(time * 4) % 4];
-                    data[i] = Math.sign(Math.sin(2 * Math.PI * note * time)) * 0.015; // Soft square wave
-                }
+                let utterance = new SpeechSynthesisUtterance("Sixty Seven!");
+                utterance.lang = 'en-US'; 
                 
-                bgmNode = audioCtx.createBufferSource();
-                bgmNode.buffer = buffer;
-                bgmNode.loop = true;
-                bgmNode.connect(audioCtx.destination);
-                bgmNode.start();
-            } catch(e) {}
+                // CRITICAL HACK: Make it sound super funny, high-pitched like a minion / meme
+                utterance.pitch = 2.0;  // Maximum funny high pitch
+                utterance.rate = 1.4;   // Fast funny talking speed
+                utterance.volume = 1.0; // Max volume
+                
+                window.speechSynthesis.speak(utterance);
+            } catch (e) {}
         }
 
         function playEatSound(is67) {
+            if (is67) {
+                speakSixtySeven(); // Speak "Sixty Seven!" immediately
+                return;
+            }
             if (!audioCtx) return;
             try {
                 let osc = audioCtx.createOscillator();
@@ -165,23 +155,13 @@
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
                 
-                if (is67) {
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(200, audioCtx.currentTime);
-                    osc.frequency.linearRampToValueAtTime(1500, audioCtx.currentTime + 0.3);
-                    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                    gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.3);
-                    osc.start();
-                    osc.stop(audioCtx.currentTime + 0.3);
-                } else {
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(450, audioCtx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(900, audioCtx.currentTime + 0.1);
-                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-                    gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.1);
-                    osc.start();
-                    osc.stop(audioCtx.currentTime + 0.1);
-                }
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.1);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.1);
             } catch(e) {}
         }
 
@@ -195,17 +175,31 @@
                 
                 osc.type = 'sawtooth';
                 osc.frequency.setValueAtTime(180, audioCtx.currentTime);
-                osc.frequency.linearRampToValueAtTime(40, audioCtx.currentTime + 0.5);
+                osc.frequency.linearRampToValueAtTime(50, audioCtx.currentTime + 0.4);
                 gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5);
+                gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.4);
                 
                 osc.start();
-                osc.stop(audioCtx.currentTime + 0.5);
+                osc.stop(audioCtx.currentTime + 0.4);
             } catch(e) {}
         }
 
+        // NEW: Function triggered when clicking START GAME
+        function startGame() {
+            initAudio(); // Legally unlock browser audio
+            isGameStarted = true;
+            startMenu.style.display = 'none'; // Hide the menu
+            // Play a funny entry audio hint
+            if (window.speechSynthesis) {
+                let welcome = new SpeechSynthesisUtterance("Let's go!");
+                welcome.lang = 'en-US';
+                welcome.pitch = 1.6;
+                welcome.rate = 1.2;
+                window.speechSynthesis.speak(welcome);
+            }
+        }
+
         // --- Core Variables ---
-        let gameRunning = false; // NEW: Game stands still until menu is pressed
         let snake = [
             {x: 400, y: 300},
             {x: 385, y: 300},
@@ -221,7 +215,6 @@
         let isGameOver = false; 
         let growPending = 0;   
         let waveTimer = 0; 
-        
         let goofyMemeTimer = 0;    
         let memeTextTimer = 0;     
         let lastMemeMessage = "";   
@@ -234,15 +227,8 @@
             "SHEESH! 67 POWER!"
         ];
 
-        let food = {
-            x: 0,
-            y: 0,
-            radius: 16, 
-            pulse: 1,
-            type: '🍎'   
-        };
-
-        const foodPool = ['🍎', '🍓', '🍕', '🍇', '🍔', '🍟', '67'];
+        let food = { x: 0, y: 0, radius: 16, pulse: 1, type: '🍎' };
+        const foodPool = ['🍎', '🍌', '🍓', '🍕', '🍇', '🍔', '67'];
 
         function respawnFood() {
             food.x = Math.random() * (canvas.width - 100) + 50;
@@ -258,17 +244,9 @@
 
         respawnFood();
 
-        // --- Menu Trigger Activation ---
-        function startGameFromMenu() {
-            initAudioEngine();      // 1. Unlocks Audio completely
-            startScreen.style.display = 'none'; // 2. Removes menu overlay
-            uiLayer.style.display = 'block';     // 3. Shows score
-            gameRunning = true;     // 4. Activates update loop
-        }
-
         // --- Core Logic: Update ---
         function update() {
-            if (!gameRunning || isGameOver) return; 
+            if (!isGameStarted || isGameOver) return; // Wait for game start menu
 
             if (goofyMemeTimer > 0) goofyMemeTimer--;
             if (memeTextTimer > 0) memeTextTimer--;
@@ -306,7 +284,7 @@
                     goofyMemeTimer = 90; 
                     memeTextTimer = 90;  
                     lastMemeMessage = memePhrases[Math.floor(Math.random() * memePhrases.length)];
-                    playEatSound(true);  
+                    playEatSound(true);  // Trigger English Meme Voice!
                 } else {
                     score += 10;
                     playEatSound(false); 
@@ -382,7 +360,6 @@
                     ctx.arc(rightEyeX, rightEyeY, pupilOffset, 0, Math.PI * 2);
                     ctx.fillStyle = '#000000';
                     ctx.fill();
-
                 } else {
                     let bodyRadius = radius * (1 - index / (snake.length + 10));
                     ctx.arc(renderX, renderY, bodyRadius, 0, Math.PI * 2);
@@ -391,7 +368,7 @@
                 }
             });
 
-            // 2. Draw Food
+            // 2. Draw Food 
             ctx.save();
             ctx.translate(food.x, food.y);
             let currentScale = food.pulse;
@@ -411,7 +388,7 @@
             }
             ctx.restore();
 
-            // Flashing Text Banner
+            // Flashing meme text on screen center
             if (memeTextTimer > 0) {
                 ctx.save();
                 ctx.fillStyle = memeTextTimer % 4 === 0 ? '#00e5ff' : '#ffea00'; 
@@ -465,8 +442,9 @@
             requestAnimationFrame(loop);
         }
 
-        // --- Control Listeners ---
+        // --- Controls Controls Listener ---
         window.addEventListener('keydown', (e) => {
+            initAudio(); 
             if (isGameOver) {
                 resetGame();
                 return;
@@ -483,6 +461,7 @@
         let touchStartY = 0;
 
         window.addEventListener('touchstart', (e) => {
+            initAudio(); 
             if (isGameOver) {
                 resetGame();
                 return;
@@ -492,7 +471,7 @@
         }, { passive: true });
 
         window.addEventListener('touchmove', (e) => {
-            if (!touchStartX || !touchStartY || isGameOver) return;
+            if (!touchStartX || !touchStartY || isGameOver || !isGameStarted) return;
 
             let touchEndX = e.touches[0].clientX;
             let touchEndY = e.touches[0].clientY;
