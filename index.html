@@ -51,6 +51,33 @@
             pointer-events: none;
             font-family: monospace;
         }
+        /* NEW: Speed Selector UI on the Top Right Corner */
+        #speed-controller {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 10px;
+            z-index: 5;
+        }
+        .speed-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: monospace;
+            transition: all 0.2s;
+        }
+        .speed-btn.active {
+            background: #ffea00;
+            color: #110e1c;
+            border-color: #ffea00;
+            box-shadow: 0 0 10px rgba(255, 234, 0, 0.4);
+        }
         #start-menu {
             position: absolute;
             top: 0;
@@ -89,6 +116,13 @@
         </div>
         
         <div id="ui-layer">SCORE: <span id="score">000</span></div>
+
+        <div id="speed-controller">
+            <button class="speed-btn" id="btn-low" onclick="changeSpeed('LOW')">LOW</button>
+            <button class="speed-btn active" id="btn-med" onclick="changeSpeed('MED')">MED</button>
+            <button class="speed-btn" id="btn-high" onclick="changeSpeed('HIGH')">HIGH</button>
+        </div>
+
         <canvas id="gameCanvas" width="800" height="600"></canvas>
     </div>
 
@@ -192,7 +226,11 @@
         ];
         
         let radius = 12;       
-        let speed = 6;         
+        
+        // NEW SPEED SETTINGS
+        let currentSpeedMode = 'MED'; // Default speed mode
+        let speed = 5.5;              // Actual numerical speed
+        
         let angle = 0;         
         let targetAngle = 0;   
         let score = 0;
@@ -214,11 +252,38 @@
         let food = { x: 0, y: 0, radius: 16, pulse: 1, type: '🍎' };
         const fruits = ['🍎', '🍌', '🍓', '🍩', '🍕', '🍇', '🍉', '🥑', '🍔', '🍟'];
 
+        // NEW: Function to switch speeds dynamically via UI buttons
+        function changeSpeed(mode) {
+            currentSpeedMode = mode;
+            
+            // Remove active style from all speed buttons
+            document.getElementById('btn-low').classList.remove('active');
+            document.getElementById('btn-med').classList.remove('active');
+            document.getElementById('btn-high').classList.remove('active');
+            
+            // Add active style to selected button
+            if (mode === 'LOW') {
+                document.getElementById('btn-low').classList.add('active');
+                speed = 3.8; // Safe and perfect for smaller phones
+            } else if (mode === 'MED') {
+                document.getElementById('btn-med').classList.add('active');
+                speed = 5.5; // Balanced
+            } else if (mode === 'HIGH') {
+                document.getElementById('btn-high').classList.add('active');
+                speed = 7.5; // High speed for pro ipad layout
+            }
+            
+            // If the game is already over, reset it with the new speed setting
+            if (isGameOver) {
+                resetGame();
+            }
+        }
+
         function respawnFood() {
             food.x = Math.random() * (canvas.width - 100) + 50;
             food.y = Math.random() * (canvas.height - 100) + 50;
             
-            // 按照要求：大幅度调低 67 出现的概率（降到 9%），回归正常水果为主
+            // 按照要求：精准调整 67 的刷新率到 20%（0.20 八仙）
             if (Math.random() < 0.20) {
                 food.type = '67';
                 food.radius = 28; 
@@ -277,11 +342,10 @@
                 }
                 scoreEl.innerText = score.toString().padStart(3, '0');
                 respawnFood();
-                speed += 0.15; 
-                growPending += 3; 
+                speed += 0.15; // Gradually speeds up as it eats
+            } else {
+                if (growPending > 0) { growPending--; } else { snake.pop(); }
             }
-
-            if (growPending > 0) { growPending--; } else { snake.pop(); }
 
             for (let i = 15; i < snake.length; i++) {
                 let sDx = head.x - snake[i].x;
@@ -384,8 +448,21 @@
         }
 
         function resetGame() {
-            score = 0; speed = 6; angle = 0; targetAngle = 0; isGameOver = false; growPending = 0; waveTimer = 0; goofyMemeTimer = 0; memeTextTimer = 0;
+            score = 0; 
+            angle = 0; 
+            targetAngle = 0; 
+            isGameOver = false; 
+            growPending = 0; 
+            waveTimer = 0; 
+            goofyMemeTimer = 0; 
+            memeTextTimer = 0;
             scoreEl.innerText = "000";
+            
+            // Re-apply correct base speed depending on chosen mode during reset
+            if (currentSpeedMode === 'LOW') speed = 3.8;
+            else if (currentSpeedMode === 'MED') speed = 5.5;
+            else if (currentSpeedMode === 'HIGH') speed = 7.5;
+
             snake = [{x: 400, y: 300}, {x: 385, y: 300}, {x: 370, y: 300}, {x: 355, y: 300}];
             respawnFood();
         }
