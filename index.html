@@ -3,99 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>JJ 67 Snake Game </title>
+    <title> JJ 67 Snake Game </title>
     <style>
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
-        body {
-            background: radial-gradient(circle at center, #14112a 0%, #050408 100%);
+        body, html {
+            width: 100%;
+            height: 100%;
+            background: #06040a;
             color: #fff;
-            font-family: system-ui, -apple-system, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
             overflow: hidden;
             touch-action: none; 
             -webkit-user-select: none;
             user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        /* 优化：增大画面尺寸，iPad上更饱满，手机上自动缩放自适应 */
+        /* 画面撑满全屏，更高级、更大 */
         #game-container {
             position: relative;
-            box-shadow: 0 30px 70px rgba(0,0,0,0.8);
-            border-radius: 24px;
+            width: 100vw;
+            height: 100vh;
+            background: #090712;
             overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.08);
-            width: 96vw;
-            height: 72vw; /* 保持 4:3 黄金大画面 */
-            max-width: 1024px; /* iPad 上允许展现的最大宽度 */
-            max-height: 768px;
-        }
-        @media (max-aspect-ratio: 4/3) {
-            #game-container {
-                width: 96vw;
-                height: 72vw;
-            }
-        }
-        @media (min-aspect-ratio: 4/3) {
-            #game-container {
-                height: 90vh;
-                width: 120vh; /* 宽屏设备下优化 */
-            }
         }
         canvas {
             display: block;
-            background: #080610;
             width: 100%;
             height: 100%;
         }
-        /* 毛玻璃 UI */
+        /* 高级半透明毛玻璃 UI */
         #ui-layer {
             position: absolute;
-            top: 20px;
-            left: 20px;
-            padding: 12px 18px;
-            background: rgba(255, 255, 255, 0.04);
-            -webkit-backdrop-filter: blur(15px);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 14px;
-            font-size: 13px; 
-            font-weight: 800;
+            top: 24px;
+            left: 24px;
+            padding: 14px 20px;
+            background: rgba(255, 255, 255, 0.07);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            font-size: 14px; 
+            font-weight: 900;
             letter-spacing: 1.5px;
             pointer-events: none;
             font-family: monospace;
             display: flex;
             flex-direction: column;
             gap: 6px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-            z-index: 5;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+            z-index: 10;
         }
         #speed-controller {
             position: absolute;
-            top: 20px;
-            right: 20px;
+            top: 24px;
+            right: 24px;
             display: flex;
             gap: 6px;
-            z-index: 5;
-            padding: 4px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            z-index: 10;
+            padding: 5px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         .speed-btn {
-            padding: 6px 14px;
-            font-size: 11px;
-            font-weight: 700;
+            padding: 8px 16px;
+            font-size: 12px;
+            font-weight: 800;
             color: rgba(255, 255, 255, 0.6);
             background: transparent;
             border: none;
-            border-radius: 7px;
+            border-radius: 8px;
             cursor: pointer;
             font-family: monospace;
             transition: all 0.2s ease;
@@ -103,7 +86,6 @@
         .speed-btn.active {
             background: #ffea00;
             color: #090712;
-            font-weight: 800;
         }
         #start-menu {
             position: absolute;
@@ -111,16 +93,16 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: #050408;
+            background: #06040a;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            z-index: 10;
+            z-index: 20;
         }
         #play-btn {
-            padding: 16px 48px;
-            font-size: 22px;
+            padding: 18px 56px;
+            font-size: 24px;
             font-weight: 900;
             letter-spacing: 2px;
             color: #06040a;
@@ -128,7 +110,7 @@
             border: none;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 12px 35px rgba(255, 234, 0, 0.4);
+            box-shadow: 0 15px 40px rgba(255, 234, 0, 0.4);
         }
     </style>
 </head>
@@ -140,7 +122,7 @@
         </div>
         
         <div id="ui-layer">
-            <div style="color: rgba(255,255,255,0.9); font-size: 15px;">SCORE: <span id="score" style="color: #fff; font-weight:900;">000</span></div>
+            <div style="color: rgba(255,255,255,0.9); font-size: 16px;">SCORE: <span id="score" style="color: #fff; font-weight:900;">000</span></div>
             <div style="color: #ff2a74; font-size: 11px;">HIGHEST RECORD: <span id="high-score" style="font-weight:800;">000</span></div>
             <div id="food-counter" style="color: #00e5ff; font-size: 11px; font-weight:800;">EATEN: 0</div>
         </div>
@@ -151,7 +133,7 @@
             <button id="btn-high" class="speed-btn" onclick="changeSpeedSetting('HIGH')">HIGH</button>
         </div>
 
-        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        <canvas id="gameCanvas"></canvas>
     </div>
 
     <script>
@@ -162,10 +144,18 @@
         const foodCounterEl = document.getElementById('food-counter');
         const startMenu = document.getElementById('start-menu');
 
+        // 动态调整 Canvas 尺寸为全屏
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
         let audioCtx = null;
         let isGameStarted = false; 
 
-        const SPEED_MODIFIERS = { 'LOW': 4, 'MED': 6.5, 'HIGH': 9 };
+        const SPEED_MODIFIERS = { 'LOW': 5, 'MED': 7.5, 'HIGH': 10.5 };
         let currentSpeedSetting = 'MED';
 
         let currentSkin = 'CLASSIC';
@@ -235,6 +225,7 @@
             initAudio(); 
             isGameStarted = true;
             startMenu.style.display = 'none'; 
+            resetGame();
         }
 
         function changeSpeedSetting(newSetting) {
@@ -255,9 +246,9 @@
             }
         }
 
-        // --- Core Variables ---
-        let snake = [{x: 400, y: 300}, {x: 385, y: 300}, {x: 370, y: 300}, {x: 355, y: 300}];
-        let radius = 12;       
+        // --- 核心变量 ---
+        let snake = [];
+        let radius = 14; // 蛇身稍微放大，大屏更清晰      
         let speed = SPEED_MODIFIERS['MED'];         
         let angle = 0;         
         let targetAngle = 0;   
@@ -271,45 +262,45 @@
         let consecutiveNon67Count = 0; 
 
         const memePhrases = ["BRUH!! 67!!!", "WHAT THE 67?!!", "OH MY GOD 67!!", "67 IS SO GOOFY LMAO", "SHEESH! 67 POWER!"];
-        let food = { x: 0, y: 0, radius: 16, pulse: 1, type: '🍎' };
+        let food = { x: 0, y: 0, radius: 18, pulse: 1, rot: 0, type: '🍎' };
         const fruits = ['🍎', '🍌', '🍓', '🍩', '🍕', '🍇', '🍉', '🥑', '🍔', '🍟'];
 
-        // 优化：智能避让算法，防止食物刷到左上角 UI 区域和右上角速度区
+        // 核心安全优化：绝对不让食物刷新在左上角/右上角的 UI 后面
         function respawnFood() {
             let valid = false;
-            let rx, ry;
-            
-            while (!valid) {
-                rx = Math.random() * (canvas.width - 100) + 50;
-                ry = Math.random() * (canvas.height - 100) + 50;
-                
-                // 避开左上角 UI 区域 (x < 240, y < 140) 
-                if (rx < 240 && ry < 140) continue;
-                // 避开右上角速度区域 (x > 560, y < 80)
-                if (rx > 560 && ry < 80) continue;
-                
-                valid = true;
-            }
+            let rx, ry, rRad;
 
-            food.x = rx;
-            food.y = ry;
-            
             let dynamicChance = 0.20; 
             if (consecutiveNon67Count > 4) dynamicChance = 0.50; 
             if (consecutiveNon67Count === 0) dynamicChance = 0.05; 
 
             if (Math.random() < dynamicChance) {
                 food.type = '67';
-                food.radius = 28; 
+                rRad = 35; // 狂暴大 67 尺寸
                 consecutiveNon67Count = 0; 
             } else {
                 food.type = fruits[Math.floor(Math.random() * fruits.length)];
-                food.radius = 16;
+                rRad = 18;
                 consecutiveNon67Count++;
             }
-        }
 
-        respawnFood();
+            while(!valid) {
+                rx = Math.random() * (canvas.width - 120) + 60;
+                ry = Math.random() * (canvas.height - 120) + 60;
+
+                // 避开左上角 UI 区域 (x < 250, y < 140)
+                if (rx < 250 && ry < 140) continue;
+                // 避开右上角 按钮 区域 (x > canvas.width - 250, y < 100)
+                if (rx > canvas.width - 250 && ry < 100) continue;
+
+                valid = true;
+            }
+
+            food.x = rx;
+            food.y = ry;
+            food.radius = rRad;
+            food.rot = Math.random() * Math.PI * 2;
+        }
 
         function update() {
             if (!isGameStarted || isGameOver) return; 
@@ -323,15 +314,19 @@
                 waveTimer += speed * 0.02; 
             }
 
+            // 67 自己的魔性自体旋转和缩放运动计算
+            food.rot += 0.08; 
+
             let angleDiff = targetAngle - angle;
             angleDiff = Math.atan2(Math.sin(angleDiff), Math.cos(angleDiff));
-            angle += angleDiff * 0.2; 
+            angle += angleDiff * 0.25; 
 
             let head = {
                 x: snake[0].x + Math.cos(angle) * speed,
                 y: snake[0].y + Math.sin(angle) * speed
             };
 
+            // 触碰全屏边界判死
             if (head.x > canvas.width || head.x < 0 || head.y > canvas.height || head.y < 0) {
                 isGameOver = true;
                 playGameOverSound(); 
@@ -368,8 +363,8 @@
                 }
 
                 respawnFood();
-                speed += 0.12; 
-                growPending += 3; 
+                speed += 0.15; 
+                growPending += 4; 
             }
 
             if (growPending > 0) { growPending--; } else { snake.pop(); }
@@ -385,120 +380,117 @@
                 }
             }
 
-            food.pulse = 1 + Math.sin(Date.now() * 0.005) * 0.15;
+            // 灵魂律动：如果是67，放大缩小的律动感强2倍！
+            if(food.type === '67') {
+                food.pulse = 1 + Math.sin(Date.now() * 0.015) * 0.25;
+            } else {
+                food.pulse = 1 + Math.sin(Date.now() * 0.005) * 0.15;
+            }
         }
 
         function draw() {
+            // 彻底解决变黑：不使用任何 shadow 滤镜，直接进行最高画质的全屏高频 HSL 色彩风暴
             if (goofyMemeTimer > 0) {
-                let hue = (Date.now() * 0.4) % 360;
-                ctx.fillStyle = `hsla(${hue}, 85%, 14%, 1)`;
+                let hue = (Date.now() * 0.5) % 360;
+                ctx.fillStyle = `hsla(${hue}, 90%, 15%, 1)`;
             } else {
-                ctx.fillStyle = '#0a0813'; 
+                ctx.fillStyle = '#0a0816'; 
             }
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // iPad 安全版高级发光技术：通过高透明色块多层叠加，模拟出完美的电竞发光，绝不变黑！
-            let mainColor, glowColor;
-            if (currentSkin === 'BLUE') {
-                mainColor = '#00e5ff'; glowColor = 'rgba(0, 229, 255, 0.3)';
-            } else if (currentSkin === 'GOLD') {
-                mainColor = '#ffea00'; glowColor = 'rgba(255, 234, 0, 0.3)';
-            } else {
-                mainColor = '#00ff66'; glowColor = 'rgba(0, 255, 102, 0.3)';
-            }
-
-            // 1. 绘制蛇（发光外圈 + 实体内圈）
+            // 1. 绘制蛇身
             snake.forEach((segment, index) => {
+                ctx.beginPath();
                 let renderX = segment.x;
                 let renderY = segment.y;
 
                 if (goofyMemeTimer > 0) {
-                    renderX += Math.sin(waveTimer + index * 0.8) * 14 * Math.sin(angle + Math.PI/2);
-                    renderY += Math.cos(waveTimer + index * 0.8) * 14 * Math.cos(angle + Math.PI/2);
+                    renderX += Math.sin(waveTimer + index * 0.8) * 16 * Math.sin(angle + Math.PI/2);
+                    renderY += Math.cos(waveTimer + index * 0.8) * 16 * Math.cos(angle + Math.PI/2);
                 }
 
-                let bodyRadius = index === 0 ? radius * 1.3 : radius * (1 - index / (snake.length + 12));
-                if (bodyRadius < 3) bodyRadius = 3;
-
-                // 绘制安全发光晕层
-                ctx.beginPath();
-                ctx.arc(renderX, renderY, bodyRadius + 6, 0, Math.PI * 2);
-                ctx.fillStyle = glowColor;
-                ctx.fill();
-
-                // 绘制实体中心
-                ctx.beginPath();
-                ctx.arc(renderX, renderY, bodyRadius, 0, Math.PI * 2);
                 if (index === 0) {
-                    ctx.fillStyle = mainColor;
-                } else {
-                    ctx.fillStyle = index % 2 === 0 ? mainColor : 'rgba(255,255,255,0.2)';
-                }
-                ctx.fill();
+                    ctx.arc(renderX, renderY, radius * 1.3, 0, Math.PI * 2); 
+                    
+                    if (currentSkin === 'BLUE') ctx.fillStyle = '#00e5ff';
+                    else if (currentSkin === 'GOLD') ctx.fillStyle = '#ffea00';
+                    else ctx.fillStyle = '#00ff66'; 
+                    
+                    ctx.fill();
 
-                // 头部画眼
-                if (index === 0) {
+                    // 眼睛
                     let eyeOffsetAngle = 0.5; 
-                    let leftEyeX = renderX + Math.cos(angle - eyeOffsetAngle) * 10;
-                    let leftEyeY = renderY + Math.sin(angle - eyeOffsetAngle) * 10;
-                    ctx.beginPath(); ctx.arc(leftEyeX, leftEyeY, 5, 0, Math.PI * 2); ctx.fillStyle = '#ffffff'; ctx.fill();
-                    ctx.beginPath(); ctx.arc(leftEyeX, leftEyeY, goofyMemeTimer > 0 ? 1 : 2.5, 0, Math.PI * 2); ctx.fillStyle = '#000000'; ctx.fill();
+                    let leftEyeX = renderX + Math.cos(angle - eyeOffsetAngle) * 11;
+                    let leftEyeY = renderY + Math.sin(angle - eyeOffsetAngle) * 11;
+                    ctx.beginPath(); ctx.arc(leftEyeX, leftEyeY, 5.5, 0, Math.PI * 2); ctx.fillStyle = '#ffffff'; ctx.fill();
+                    ctx.beginPath(); 
+                    let pupilOffset = goofyMemeTimer > 0 ? 1 : 2.5;
+                    ctx.arc(leftEyeX, leftEyeY, pupilOffset, 0, Math.PI * 2); ctx.fillStyle = '#000000'; ctx.fill();
 
-                    let rightEyeX = renderX + Math.cos(angle + eyeOffsetAngle) * 10;
-                    let rightEyeY = renderY + Math.sin(angle + eyeOffsetAngle) * 10;
-                    ctx.beginPath(); ctx.arc(rightEyeX, rightEyeY, 5, 0, Math.PI * 2); ctx.fillStyle = '#ffffff'; ctx.fill();
-                    ctx.beginPath(); ctx.arc(rightEyeX, rightEyeY, goofyMemeTimer > 0 ? 1 : 2.5, 0, Math.PI * 2); ctx.fillStyle = '#000000'; ctx.fill();
+                    let rightEyeX = renderX + Math.cos(angle + eyeOffsetAngle) * 11;
+                    let rightEyeY = renderY + Math.sin(angle + eyeOffsetAngle) * 11;
+                    ctx.beginPath(); ctx.arc(rightEyeX, rightEyeY, 5.5, 0, Math.PI * 2); ctx.fillStyle = '#ffffff'; ctx.fill();
+                    ctx.beginPath(); ctx.arc(rightEyeX, rightEyeY, pupilOffset, 0, Math.PI * 2); ctx.fillStyle = '#000000'; ctx.fill();
+                } else {
+                    let bodyRadius = radius * (1 - index / (snake.length + 15));
+                    if(bodyRadius < 4) bodyRadius = 4;
+                    ctx.arc(renderX, renderY, bodyRadius, 0, Math.PI * 2);
+                    
+                    if (currentSkin === 'BLUE') {
+                        ctx.fillStyle = index % 2 === 0 ? '#00b0ff' : '#0077ff';
+                    } else if (currentSkin === 'GOLD') {
+                        ctx.fillStyle = index % 2 === 0 ? '#ffd700' : '#ff9100';
+                    } else {
+                        ctx.fillStyle = index % 2 === 0 ? '#00cc55' : '#00aa44'; 
+                    }
+                    ctx.fill();
                 }
             });
 
-            // 2. 绘制食物
+            // 2. 绘制食物（找回魔性灵魂：让 67 旋转跳跃闭着眼！）
             ctx.save();
             ctx.translate(food.x, food.y);
-            let currentScale = food.pulse;
-            ctx.scale(currentScale, currentScale); 
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
+            ctx.scale(food.pulse, food.pulse); 
             
             if (food.type === '67') {
-                // 为 67 渲染安全霓虹光环
-                ctx.beginPath();
-                ctx.arc(0, 0, 35, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(255, 234, 0, 0.25)';
-                ctx.fill();
-
-                ctx.font = "900 64px Impact, Arial Black, sans-serif"; 
+                ctx.rotate(food.rot); // 注入狂放旋转灵魂
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.font = "900 75px Impact, Arial Black, sans-serif"; 
                 ctx.fillStyle = '#ffea00'; 
                 ctx.fillText(food.type, 0, 0);
             } else {
-                ctx.font = "36px serif";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.font = "42px serif";
                 ctx.fillText(food.type, 0, 0); 
             }
             ctx.restore();
 
-            // 飘字魔性标签
+            // 魔性恶搞字眼
             if (memeTextTimer > 0) {
                 ctx.save();
                 ctx.fillStyle = memeTextTimer % 4 === 0 ? '#00ffff' : '#ff0055'; 
-                ctx.font = '900 42px Impact, Arial Black, sans-serif';
+                ctx.font = '900 46px Impact, Arial Black, sans-serif';
                 ctx.textAlign = 'center';
-                let textShakeY = Math.sin(Date.now() * 0.06) * 7;
-                ctx.fillText(lastMemeMessage, canvas.width / 2, 115 + textShakeY);
+                let textShakeY = Math.sin(Date.now() * 0.08) * 8;
+                ctx.fillText(lastMemeMessage, canvas.width / 2, canvas.height / 3 + textShakeY);
                 ctx.restore();
             }
 
-            // Game Over 面板
+            // 死亡结算
             if (isGameOver) {
                 ctx.fillStyle = 'rgba(5, 3, 10, 0.85)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = '#ff0055';
-                ctx.font = '900 50px system-ui, sans-serif'; 
+                ctx.font = '900 55px system-ui, sans-serif'; 
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 25);
 
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-                ctx.font = '600 14px monospace'; 
-                ctx.fillText('TAP SCREEN TO RESTART', canvas.width / 2, canvas.height / 2 + 45);
+                ctx.font = '600 16px monospace'; 
+                ctx.fillText('TAP SCREEN TO RESTART', canvas.width / 2, canvas.height / 2 + 50);
             }
         }
 
@@ -506,17 +498,22 @@
             score = 0; 
             totalFoodEatenThisSession = 0;
             currentSkin = 'CLASSIC';
-            foodCounterEl.innerText = "EATEN: 0";
+            if(foodCounterEl) foodCounterEl.innerText = "EATEN: 0";
 
             speed = SPEED_MODIFIERS[currentSpeedSetting]; 
             angle = 0; targetAngle = 0; isGameOver = false; growPending = 0; waveTimer = 0; goofyMemeTimer = 0; memeTextTimer = 0;
-            scoreEl.innerText = "000";
-            snake = [{x: 400, y: 300}, {x: 385, y: 300}, {x: 370, y: 300}, {x: 355, y: 300}];
+            if(scoreEl) scoreEl.innerText = "000";
+            
+            // 初始化蛇的位置在屏幕中央
+            let cx = canvas.width / 2;
+            let cy = canvas.height / 2;
+            snake = [{x: cx, y: cy}, {x: cx-15, y: cy}, {x: cx-30, y: cy}, {x: cx-45, y: cy}];
             respawnFood();
         }
 
         function loop() { update(); draw(); requestAnimationFrame(loop); }
 
+        // 键盘监听
         window.addEventListener('keydown', (e) => {
             initAudio(); 
             if (isGameOver) { resetGame(); return; }
@@ -528,6 +525,7 @@
             }
         });
 
+        // 完美适配 iPad/手机全屏滑动的触控监听
         let touchStartX = 0; let touchStartY = 0;
         window.addEventListener('touchstart', (e) => {
             initAudio(); 
